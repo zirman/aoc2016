@@ -25,7 +25,7 @@ fun main() {
                             .digitToIntOrNull()
                             ?.takeIf { it in 0..7 }
                             ?.takeIf { password[it] == null }
-                            ?.let { password.mapIndexed { index, c -> if (index == it) hash[6] else c } }
+                            ?.let { index -> password.mapIndexed { i, c -> if (i == index) hash[6] else c } }
                     }
                     ?: password
             }
