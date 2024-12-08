@@ -2,6 +2,7 @@ import java.math.BigInteger
 import java.security.MessageDigest
 import kotlin.io.path.Path
 import kotlin.io.path.readLines
+import kotlin.system.measureTimeMillis
 
 /**
  * Reads lines from the given input txt file.
@@ -20,21 +21,44 @@ fun String.md5() = BigInteger(1, MessageDigest.getInstance("MD5").digest(toByteA
  */
 fun Any?.println() = println(this)
 
+fun printlnMeasureTimeMillis(block: () -> Unit) {
+    measureTimeMillis(block)
+        .also { println("time: $it") }
+}
+
+data class Pos(val row: Int, val col: Int)
+operator fun Pos.minus(pos: Pos): Pos = Pos(
+    row - pos.row,
+    col - pos.col,
+)
+operator fun Pos.plus(pos: Pos): Pos = Pos(
+    row + pos.row,
+    col + pos.col,
+)
+data class Size(val width: Int, val height: Int)
+
+fun List<String>.toSize(): Size = Size(width = this[0].length, height = size)
+
+operator fun Size.contains(pos: Pos): Boolean =
+    pos.row >= 0 && pos.row < height &&
+            pos.col >= 0 && pos.col < width
 
 fun <T> List<T>.dropAt(index: Int): List<T> = filterIndexed { i, t -> index != i }
 
-fun <T> List<T>.permutation(prefix: List<T> = emptyList()): List<List<T>> {
+fun <T> Iterable<T>.countUnique(): Int = toSet().size
+
+fun <T> List<T>.permutations(prefix: List<T> = emptyList()): List<List<T>> {
     if (isEmpty()) {
         return listOf(prefix)
     }
     return flatMapIndexed { index, t ->
         buildList(size - 1) {
-            this@permutation.forEachIndexed { index2, t ->
+            this@permutations.forEachIndexed { index2, t ->
                 if (index != index2) {
                     add(t)
                 }
             }
-        }.permutation(
+        }.permutations(
             buildList(prefix.size + 1) {
                 addAll(prefix)
                 add(t)
@@ -43,15 +67,15 @@ fun <T> List<T>.permutation(prefix: List<T> = emptyList()): List<List<T>> {
     }
 }
 
-fun <T> List<T>.combination(size: Int): List<List<T>> {
+fun <T> List<T>.combinations(size: Int): List<List<T>> {
     fun MutableList<List<T>>.recur(i: Int, c: List<T>) {
         if (c.size == size) {
             this@recur.add(c)
             return
         }
 
-        (i..<this@combination.size).forEach { t ->
-            recur(t + 1, c + this@combination[t])
+        (i..<this@combinations.size).forEach { t ->
+            recur(t + 1, c + this@combinations[t])
         }
     }
     return buildList {
