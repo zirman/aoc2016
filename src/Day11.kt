@@ -8,15 +8,7 @@ private data class RTGState(
 private val rtgComparator = compareBy<RTG> { t -> t.generatorFloor }.thenBy { it.microchipFloor }
 
 private fun RTGState.isValid(): Boolean {
-//    if (elevator !in 1..4) {
-//        return false
-//    }
     for (i in rtgs.indices) {
-//        if (rtgs[i].microchipFloor !in 1..4 ||
-//            rtgs[i].generatorFloor !in 1..4
-//        ) {
-//            return false
-//        }
         if (rtgs[i].microchipFloor != rtgs[i].generatorFloor) {
             for (k in rtgs.indices) {
                 if (i != k && rtgs[i].microchipFloor == rtgs[k].generatorFloor) {
@@ -48,37 +40,37 @@ private fun RTGState.nextStates(): Set<RTGState> {
             buildList {
                 var newFloor = elevator + 1
                 if (newFloor <= 4) {
-                    add(
-                        RTGState(
-                            rtgs = movingRtgs.fold(rtgs) { rtgs, (isotope, update) ->
-                                rtgs.mapIndexed { i, rtg ->
-                                    if (isotope == i) {
-                                        rtg.update(newFloor)
-                                    } else {
-                                        rtg
-                                    }
+                    RTGState(
+                        rtgs = movingRtgs.fold(rtgs) { rtgs, (isotope, update) ->
+                            rtgs.mapIndexed { i, rtg ->
+                                if (isotope == i) {
+                                    rtg.update(newFloor)
+                                } else {
+                                    rtg
                                 }
-                            }.sortedWith(rtgComparator),
-                            elevator = newFloor,
-                        ),
+                            }
+                        }.sortedWith(rtgComparator),
+                        elevator = newFloor,
                     )
+                        .takeIf { it.isValid() }
+                        ?.let { add(it) }
                 }
                 newFloor = elevator - 1
                 if (newFloor >= 1) {
-                    add(
-                        RTGState(
-                            rtgs = movingRtgs.fold(rtgs) { rtgs, (isotope, update) ->
-                                rtgs.mapIndexed { i, rtg ->
-                                    if (isotope == i) {
-                                        rtg.update(newFloor)
-                                    } else {
-                                        rtg
-                                    }
+                    RTGState(
+                        rtgs = movingRtgs.fold(rtgs) { rtgs, (isotope, update) ->
+                            rtgs.mapIndexed { i, rtg ->
+                                if (isotope == i) {
+                                    rtg.update(newFloor)
+                                } else {
+                                    rtg
                                 }
-                            }.sortedWith(rtgComparator),
-                            elevator = newFloor,
-                        ),
+                            }
+                        }.sortedWith(rtgComparator),
+                        elevator = newFloor,
                     )
+                        .takeIf { it.isValid() }
+                        ?.let { add(it) }
                 }
             }
         }
@@ -113,19 +105,20 @@ fun main() {
                     Pair(a, b)
                 }
             }
-        val initialState = RTGState(
-            rtgs = generators
-                .map { (name, generatorFloor) ->
-                    RTG(
-                        generatorFloor = generatorFloor,
-                        microchipFloor = microchips[name]!!
-                    )
-                }
-                .sortedWith(rtgComparator),
-            elevator = 1,
+        var states = listOf(
+            RTGState(
+                rtgs = generators
+                    .map { (name, generatorFloor) ->
+                        RTG(
+                            generatorFloor = generatorFloor,
+                            microchipFloor = microchips[name]!!
+                        )
+                    }
+                    .sortedWith(rtgComparator),
+                elevator = 1,
+            ),
         )
-        val visited = mutableSetOf<RTGState>()
-        var states = listOf(initialState)
+        var visited = states.toMutableSet()
         var moves = 0
         while (true) {
             if (states.any { it.isFinished() }) {
@@ -133,7 +126,7 @@ fun main() {
             }
             states = states.flatMap { state ->
                 state.nextStates()
-                    .filter { it !in visited && it.isValid() }
+                    .filter { it !in visited }
                     .also {
                         visited += it
                     }
@@ -201,7 +194,7 @@ fun main() {
     }
 
     val testInput1 = readInput("Day11_1_test")
-    check(part1(testInput1).also { println(it) } == 11)
+    check(part1(testInput1) == 11)
     val input = readInput("Day11")
     printlnMeasureTimeMillis { part1(input).println() }
     printlnMeasureTimeMillis { part2(input).println() }
