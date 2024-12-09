@@ -5,79 +5,79 @@ private data class RTGState(
     val elevator: Int,
 )
 
-private val rtgComparator = compareBy<RTG> { t -> t.generatorFloor }.thenBy { it.microchipFloor }
-
-private fun RTGState.isValid(): Boolean {
-    for (i in rtgs.indices) {
-        if (rtgs[i].microchipFloor != rtgs[i].generatorFloor) {
-            for (k in rtgs.indices) {
-                if (i != k && rtgs[i].microchipFloor == rtgs[k].generatorFloor) {
-                    return false
-                }
-            }
-        }
-    }
-    return true
-}
-
-private fun RTGState.isFinished(): Boolean {
-    return elevator == 4 && rtgs.all { rtg -> rtg.generatorFloor == 4 && rtg.microchipFloor == 4 }
-}
-
-private fun RTGState.nextStates(): Set<RTGState> {
-    val movableRtgs = rtgs.flatMapIndexed { i, rtg ->
-        buildList {
-            if (rtg.generatorFloor == elevator) {
-                add(Pair<Int, RTG.(Int) -> RTG>(i) { copy(generatorFloor = it) })
-            }
-            if (rtg.microchipFloor == elevator) {
-                add(Pair<Int, RTG.(Int) -> RTG>(i) { copy(microchipFloor = it) })
-            }
-        }
-    }
-    return (movableRtgs.combinations(1) + movableRtgs.combinations(2))
-        .flatMap { movingRtgs ->
-            buildList {
-                var newFloor = elevator + 1
-                if (newFloor <= 4) {
-                    RTGState(
-                        rtgs = movingRtgs.fold(rtgs) { rtgs, (isotope, update) ->
-                            rtgs.mapIndexed { i, rtg ->
-                                if (isotope == i) {
-                                    rtg.update(newFloor)
-                                } else {
-                                    rtg
-                                }
-                            }
-                        }.sortedWith(rtgComparator),
-                        elevator = newFloor,
-                    )
-                        .takeIf { it.isValid() }
-                        ?.let { add(it) }
-                }
-                newFloor = elevator - 1
-                if (newFloor >= 1) {
-                    RTGState(
-                        rtgs = movingRtgs.fold(rtgs) { rtgs, (isotope, update) ->
-                            rtgs.mapIndexed { i, rtg ->
-                                if (isotope == i) {
-                                    rtg.update(newFloor)
-                                } else {
-                                    rtg
-                                }
-                            }
-                        }.sortedWith(rtgComparator),
-                        elevator = newFloor,
-                    )
-                        .takeIf { it.isValid() }
-                        ?.let { add(it) }
-                }
-            }
-        }
-        .toSet()
-}
-
 fun main() {
+    val rtgComparator = compareBy<RTG> { t -> t.generatorFloor }.thenBy { it.microchipFloor }
+
+    fun RTGState.isValid(): Boolean {
+        for (i in rtgs.indices) {
+            if (rtgs[i].microchipFloor != rtgs[i].generatorFloor) {
+                for (k in rtgs.indices) {
+                    if (i != k && rtgs[i].microchipFloor == rtgs[k].generatorFloor) {
+                        return false
+                    }
+                }
+            }
+        }
+        return true
+    }
+
+    fun RTGState.isFinished(): Boolean {
+        return elevator == 4 && rtgs.all { rtg -> rtg.generatorFloor == 4 && rtg.microchipFloor == 4 }
+    }
+
+    fun RTGState.nextStates(): Set<RTGState> {
+        val movableRtgs = rtgs.flatMapIndexed { i, rtg ->
+            buildList {
+                if (rtg.generatorFloor == elevator) {
+                    add(Pair<Int, RTG.(Int) -> RTG>(i) { copy(generatorFloor = it) })
+                }
+                if (rtg.microchipFloor == elevator) {
+                    add(Pair<Int, RTG.(Int) -> RTG>(i) { copy(microchipFloor = it) })
+                }
+            }
+        }
+        return (movableRtgs.combinations(1) + movableRtgs.combinations(2))
+            .flatMap { movingRtgs ->
+                buildList {
+                    var newFloor = elevator + 1
+                    if (newFloor <= 4) {
+                        RTGState(
+                            rtgs = movingRtgs.fold(rtgs) { rtgs, (isotope, update) ->
+                                rtgs.mapIndexed { i, rtg ->
+                                    if (isotope == i) {
+                                        rtg.update(newFloor)
+                                    } else {
+                                        rtg
+                                    }
+                                }
+                            }.sortedWith(rtgComparator),
+                            elevator = newFloor,
+                        )
+                            .takeIf { it.isValid() }
+                            ?.let { add(it) }
+                    }
+                    newFloor = elevator - 1
+                    if (newFloor >= 1) {
+                        RTGState(
+                            rtgs = movingRtgs.fold(rtgs) { rtgs, (isotope, update) ->
+                                rtgs.mapIndexed { i, rtg ->
+                                    if (isotope == i) {
+                                        rtg.update(newFloor)
+                                    } else {
+                                        rtg
+                                    }
+                                }
+                            }.sortedWith(rtgComparator),
+                            elevator = newFloor,
+                        )
+                            .takeIf { it.isValid() }
+                            ?.let { add(it) }
+                    }
+                }
+            }
+            .toSet()
+    }
+
     fun part1(input: List<String>): Int {
         val floorRegex = """The [a-z]+ floor contains (.*)\.""".toRegex(RegexOption.IGNORE_CASE)
         val generatorRegex = """([a-z]+) generator""".toRegex(RegexOption.IGNORE_CASE)
