@@ -2,6 +2,7 @@ import java.math.BigInteger
 import java.security.MessageDigest
 import kotlin.io.path.Path
 import kotlin.io.path.readLines
+import kotlin.math.absoluteValue
 import kotlin.system.measureTimeMillis
 
 /**
@@ -35,6 +36,15 @@ operator fun Pos.plus(pos: Pos): Pos = Pos(
     row + pos.row,
     col + pos.col,
 )
+fun Pos.manhattanDistance(pos: Pos): Int {
+    val x = this - pos
+    return x.row.absoluteValue + x.col.absoluteValue
+}
+fun Pos.goNorth(): Pos = copy(row = row - 1)
+fun Pos.goSouth(): Pos = copy(row = row + 1)
+fun Pos.goWest(): Pos = copy(col = col + 1)
+fun Pos.goEast(): Pos = copy(col = col - 1)
+
 data class Size(val width: Int, val height: Int)
 
 fun List<String>.toSize(): Size = Size(width = this[0].length, height = size)
