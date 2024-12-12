@@ -50,5 +50,4 @@ fun main() {
     printlnMeasureTimeMillis { part1("ngcjuoqr").println() }
     check(part2("abc") == 22551)
     printlnMeasureTimeMillis { part2("ngcjuoqr").println() }
-//    part2(input).println()
 }
