@@ -1,20 +1,25 @@
 fun main() {
-    fun part1(input: List<String>): Int {
-        TODO()
+
+    fun String.randomize(size: Int): String {
+        var randomized = this
+        while (randomized.length < size) {
+            randomized = randomized + "0" + randomized.reversed().map { if (it == '0') '1' else '0' }.joinToString("")
+        }
+        return randomized.take(size)
     }
 
-    fun part2(input: List<String>): Int {
-        TODO()
+    fun String.checksum(): String {
+        var checksum = this
+        do {
+            checksum = checksum.chunked(2).joinToString("") { if (it == "00" || it == "11") "1" else "0" }
+        } while (checksum.length % 2 == 0)
+        return checksum
     }
 
-    // test if implementation meets criteria from the description, like:
-    val testInput1 = readInput("Day16_1_test")
-    check(part1(testInput1) == TODO())
+    fun String.part1(size: Int): String = randomize(size).checksum()
 
-//    val testInput2 = readInput("Day16_2_test")
-//    check(part2(testInput2) == 1)
-
-    val input = readInput("Day16")
-    part1(input).println()
-//    part2(input).println()
+    check("10000".part1(20) == "01100")
+    val input = "10010000000110000"
+    printlnMeasureTimeMillis { input.part1(272).println() }
+    printlnMeasureTimeMillis { input.part1(35651584).println() }
 }
