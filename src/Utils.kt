@@ -42,8 +42,8 @@ fun Pos.manhattanDistance(pos: Pos): Int {
 }
 fun Pos.goNorth(): Pos = copy(row = row - 1)
 fun Pos.goSouth(): Pos = copy(row = row + 1)
-fun Pos.goWest(): Pos = copy(col = col + 1)
-fun Pos.goEast(): Pos = copy(col = col - 1)
+fun Pos.goWest(): Pos = copy(col = col - 1)
+fun Pos.goEast(): Pos = copy(col = col + 1)
 
 data class Size(val width: Int, val height: Int)
 
@@ -55,7 +55,7 @@ operator fun Size.contains(pos: Pos): Boolean =
 
 fun <T> List<T>.dropAt(index: Int): List<T> = filterIndexed { i, t -> index != i }
 
-fun <T> Iterable<T>.countUnique(): Int = toSet().size
+fun <T> Iterable<T>.countDistinct(): Int = distinct().size
 
 fun <T> List<T>.permutations(prefix: List<T> = emptyList()): List<List<T>> {
     if (isEmpty()) {
