@@ -94,17 +94,22 @@ fun main() {
     }
 
     fun Int.part2(): Int {
-        val l = buildList {
-            for (i in 1..this@part2) {
-                add(i)
+        fun IntRange.recur(): Node? {
+            val size = last - first + 1
+            return if (size == 0) {
+                null
+            } else {
+                val mid = (size / 2) + first
+                Node(
+                    left = (first..<mid).recur(),
+                    value = mid,
+                    right = (mid + 1..last).recur(),
+                    size = size,
+                )
             }
-            // randomize order to so that binary tree is more balanced
-            shuffle()
         }
-        var node = Node(null, l[0], null, 1)
-        for (i in 1..<this) {
-            node += l[i]
-        }
+
+        var node = (1..this).recur()!!
         var i = 0
         while (true) {
             if (node.size == 1) {
@@ -117,7 +122,6 @@ fun main() {
             node = node.removeAt(k)!!
             i = (i + 1) % node.size
         }
-        return 0
     }
 
     check(5.part1() == 3)
