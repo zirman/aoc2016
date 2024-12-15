@@ -1,39 +1,9 @@
-import kotlin.random.Random
-import kotlin.random.nextInt
-
 private data class Node(val left: Node?, val value: Int, val right: Node?, val size: Int)
-
-fun <T> MutableList<T>.shuffle() {
-    for (i in indices) {
-        val r = Random.nextInt(i..<size)
-        val x = this[r]
-        this[r] = this[i]
-        this[i] = x
-    }
-}
 
 private operator fun Node.plus(v: Int): Node = when {
     v < value -> copy(left = left?.plus(v) ?: Node(null, v, null, 1), size = size + 1)
     v > value -> copy(right = right?.plus(v) ?: Node(null, v, null, 1), size = size + 1)
     else -> throw IllegalStateException()
-}
-
-private operator fun Node.get(index: Int): Int {
-    val i = if (left != null) {
-        if (index < left.size) {
-            return left[index]
-        }
-        index - left.size
-    } else {
-        index
-    }
-    return if (i == 0) {
-        value
-    } else if (right != null && i - 1 < right.size) {
-        right[i - 1]
-    } else {
-        throw IllegalStateException()
-    }
 }
 
 private fun Node.removeAt(index: Int): Node? {
@@ -64,13 +34,6 @@ private fun Node.removeMax(): Pair<Node?, Int> = if (right != null) {
     Pair(copy(right = r, size = size - 1), v)
 } else {
     Pair(left, value)
-}
-
-private fun Node.removeMin(): Pair<Node?, Int> = if (left != null) {
-    val (l, v) = left.removeMin()
-    Pair(copy(left = l, size = size - 1), v)
-} else {
-    Pair(right, value)
 }
 
 fun main() {
