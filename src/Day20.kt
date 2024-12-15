@@ -1,20 +1,50 @@
 fun main() {
-    fun part1(input: List<String>): Int {
-        TODO()
+    fun List<String>.part1(): UInt {
+        var i = 0.toUInt()
+        map {
+            val (a, b) = it.split('-')
+            a.toUInt()..b.toUInt()
+        }
+            .sortedBy { it.first }
+            .forEach { range ->
+                if (i < range.first) {
+                    return@part1 i
+                } else if (range.last + 1.toUInt() > i) {
+                    i = range.last + 1.toUInt()
+                }
+            }
+        throw IllegalStateException()
     }
 
-    fun part2(input: List<String>): Int {
-        TODO()
+    fun List<String>.part2(): Long {
+        var i = 0.toLong()
+        var count = 0.toLong()
+        map {
+            val (a, b) = it.split('-')
+            a.toLong()..b.toLong()
+        }
+            .sortedBy { it.first }
+            .forEach { range ->
+                if (i < range.first) {
+                    count += range.first - i
+                    i = range.last + 1.toLong()
+                } else if (i <= range.last) {
+                    i = range.last + 1.toLong()
+                }
+            }
+        if (i <= UInt.MAX_VALUE.toLong()) {
+            count += UInt.MAX_VALUE.toLong() - i + 1.toLong()
+        }
+        return count
     }
 
-    // test if implementation meets criteria from the description, like:
-    val testInput1 = readInput("Day20_1_test")
-    check(part1(testInput1) == TODO())
-
-//    val testInput2 = readInput("Day20_2_test")
-//    check(part2(testInput2) == 1)
-
+    val testInput = """
+        5-8
+        0-2
+        4-7
+    """.trimIndent().split('\n')
+    check(testInput.part1() == 3.toUInt())
     val input = readInput("Day20")
-    part1(input).println()
-//    part2(input).println()
+    printlnMeasureTimeMillis { input.part1().println() }
+    printlnMeasureTimeMillis { input.part2().println() }
 }
