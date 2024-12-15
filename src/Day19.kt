@@ -1,20 +1,127 @@
+import kotlin.random.Random
+import kotlin.random.nextInt
+
+private data class Node(val left: Node?, val value: Int, val right: Node?, val size: Int)
+
+fun <T> MutableList<T>.shuffle() {
+    for (i in indices) {
+        val r = Random.nextInt(i..<size)
+        val x = this[r]
+        this[r] = this[i]
+        this[i] = x
+    }
+}
+
+private operator fun Node.plus(v: Int): Node = when {
+    v < value -> copy(left = left?.plus(v) ?: Node(null, v, null, 1), size = size + 1)
+    v > value -> copy(right = right?.plus(v) ?: Node(null, v, null, 1), size = size + 1)
+    else -> throw IllegalStateException()
+}
+
+private operator fun Node.get(index: Int): Int {
+    val i = if (left != null) {
+        if (index < left.size) {
+            return left[index]
+        }
+        index - left.size
+    } else {
+        index
+    }
+    return if (i == 0) {
+        value
+    } else if (right != null && i - 1 < right.size) {
+        right[i - 1]
+    } else {
+        throw IllegalStateException()
+    }
+}
+
+private fun Node.removeAt(index: Int): Node? {
+    val i = if (left != null) {
+        if (index < left.size) {
+            return copy(left = left.removeAt(index), size = size - 1)
+        }
+        index - left.size
+    } else {
+        index
+    }
+    return if (i == 0) {
+        if (left != null) {
+            val (l, v) = left.removeMax()
+            copy(left = l, value = v, size = size - 1)
+        } else {
+            right
+        }
+    } else if (right != null && i - 1 < right.size) {
+        copy(right = right.removeAt(i - 1), size = size - 1)
+    } else {
+        throw IllegalStateException()
+    }
+}
+
+private fun Node.removeMax(): Pair<Node?, Int> = if (right != null) {
+    val (r, v) = right.removeMax()
+    Pair(copy(right = r, size = size - 1), v)
+} else {
+    Pair(left, value)
+}
+
+private fun Node.removeMin(): Pair<Node?, Int> = if (left != null) {
+    val (l, v) = left.removeMin()
+    Pair(copy(left = l, size = size - 1), v)
+} else {
+    Pair(right, value)
+}
+
 fun main() {
-    fun part1(input: List<String>): Int {
-        TODO()
+    fun Int.part1(): Int {
+        val ba = BooleanArray(this) { true }
+        var k = 1
+        var i = 0
+        while (true) {
+            while (!ba[i]) {
+                i = (i + 1) % this
+            }
+            if (k == this) {
+                return i + 1
+            }
+            k++
+            do {
+                i = (i + 1) % this
+            } while (!ba[i])
+            ba[i] = false
+        }
     }
 
-    fun part2(input: List<String>): Int {
-        TODO()
+    fun Int.part2(): Int {
+        val l = buildList {
+            for (i in 1..this@part2) {
+                add(i)
+            }
+            // randomize order to so that binary tree is more balanced
+            shuffle()
+        }
+        var node = Node(null, l[0], null, 1)
+        for (i in 1..<this) {
+            node += l[i]
+        }
+        var i = 0
+        while (true) {
+            if (node.size == 1) {
+                return node.value
+            }
+            val k = (i + (node.size / 2)) % node.size
+            if (k < i) {
+                i--
+            }
+            node = node.removeAt(k)!!
+            i = (i + 1) % node.size
+        }
+        return 0
     }
 
-    // test if implementation meets criteria from the description, like:
-    val testInput1 = readInput("Day19_1_test")
-    check(part1(testInput1) == TODO())
-
-//    val testInput2 = readInput("Day19_2_test")
-//    check(part2(testInput2) == 1)
-
-    val input = readInput("Day19")
-    part1(input).println()
-//    part2(input).println()
+    check(5.part1() == 3)
+    printlnMeasureTimeMillis { 3017957.part1().println() }
+    check(5.part2() == 2)
+    printlnMeasureTimeMillis { 3017957.part2().println() }
 }
