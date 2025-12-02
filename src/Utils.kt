@@ -50,7 +50,7 @@ data class Size(val width: Int, val height: Int)
 fun List<String>.toSize(): Size = Size(width = this[0].length, height = size)
 
 operator fun Size.contains(pos: Pos): Boolean =
-    pos.row >= 0 && pos.row < height &&
+    pos.row in 0..<height &&
             pos.col >= 0 && pos.col < width
 
 fun <T> List<T>.dropAt(index: Int): List<T> = filterIndexed { i, t -> index != i }
@@ -84,7 +84,7 @@ fun <T> List<T>.combinations(size: Int): List<List<T>> {
             return
         }
 
-        (i..<this@combinations.size).forEach { t ->
+        for (t in i..<this@combinations.size) {
             recur(t + 1, c + this@combinations[t])
         }
     }
@@ -92,3 +92,12 @@ fun <T> List<T>.combinations(size: Int): List<List<T>> {
         recur(0, emptyList())
     }
 }
+
+fun Pos.next(size: Size): List<Pos> = buildList {
+    this@next.goWest().takeIf { it in size }?.let { add(it) }
+    this@next.goNorth().takeIf { it in size }?.let { add(it) }
+    this@next.goEast().takeIf { it in size }?.let { add(it) }
+    this@next.goSouth().takeIf { it in size }?.let { add(it) }
+}
+
+fun Pos.index(width: Int): Int = row * width + col

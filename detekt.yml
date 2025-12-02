@@ -1,0 +1,10 @@
+complexity:
+  LongMethod:
+    active: false
+  CyclomaticComplexMethod:
+    active: false
+style:
+  MagicNumber:
+    active: false
+  ReturnCount:
+    active: false
